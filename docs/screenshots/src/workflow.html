@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>GitCode CLI Workflow</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <main class="wrap">
+      <div class="eyebrow">Common workflow</div>
+      <h1>Use files for longer text, keep the browser one flag away.</h1>
+      <p class="subtitle">
+        The main create and read flows support <code>--body-file</code>, <code>--notes-file</code>,
+        and <code>--web</code> so you can move between terminal and browser without extra glue.
+      </p>
+
+      <section class="terminal">
+        <div class="terminal-header">
+          <div class="dots">
+            <span class="dot red"></span>
+            <span class="dot yellow"></span>
+            <span class="dot green"></span>
+          </div>
+          <div class="terminal-title">Example session</div>
+        </div>
+        <div class="terminal-body">
+          <pre><span class="cmd">$ gc repo create demo-repo --public --clone --ssh</span>
+<span class="note">✓</span> Created https://gitcode.com/andy/demo-repo
+<span class="note">✓</span> Cloned git@gitcode.com:andy/demo-repo.git
+
+<span class="cmd">$ gc issue create andy/demo-repo --title "Crash on launch" --body-file ./issue.md</span>
+<span class="note">✓</span> Opened issue #12
+
+<span class="cmd">$ gc pr create andy/demo-repo --title "Fix startup path" --body-file ./pr.md --base main --head fix/startup</span>
+<span class="note">✓</span> Created pull request !7
+
+<span class="cmd">$ gc pr view 7 --web</span>
+<span class="note">✓</span> Opened https://gitcode.com/andy/demo-repo/pulls/7
+
+<span class="cmd">$ gc release create andy/demo-repo --tag v1.2.3 --title "v1.2.3" --notes-file ./release-notes.md</span>
+<span class="note">✓</span> Published release v1.2.3</pre>
+        </div>
+      </section>
+
+      <section class="grid">
+        <article class="card">
+          <h2>Readable in README</h2>
+          <p>Stable PNG assets are better than ad-hoc desktop captures. They’re consistent across devices and easier to update.</p>
+        </article>
+        <article class="card">
+          <h2>Closer to gh</h2>
+          <p><code>--body-file</code> and <code>--web</code> mirror the shortcuts people already expect when moving between terminal and browser.</p>
+        </article>
+        <article class="card full">
+          <h2>Easy to regenerate</h2>
+          <p>These screenshots come from static HTML sources in <code>docs/screenshots/src</code>, so we can re-export them whenever the CLI evolves.</p>
+        </article>
+      </section>
+    </main>
+  </body>
+  </html>

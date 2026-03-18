@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>GitCode CLI Overview</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <main class="wrap">
+      <div class="eyebrow">GitCode CLI · gh-style workflows for GitCode</div>
+      <h1>One CLI for auth, repos, PRs, issues, releases, and raw API access.</h1>
+      <p class="subtitle">
+        GitCode CLI keeps the command layout familiar if you already use <code>gh</code>,
+        while staying focused on GitCode’s REST API and day-to-day repository workflows.
+      </p>
+
+      <section class="terminal">
+        <div class="terminal-header">
+          <div class="dots">
+            <span class="dot red"></span>
+            <span class="dot yellow"></span>
+            <span class="dot green"></span>
+          </div>
+          <div class="terminal-title">gc --help</div>
+        </div>
+        <div class="terminal-body">
+          <pre><span class="cmd">$ gc --help</span>
+
+Usage: gc [OPTIONS] COMMAND [ARGS]...
+
+GitCode CLI
+
+Options:
+  <span class="flag">--profile</span> TEXT              Config profile to use.
+  <span class="flag">--host</span> TEXT                 Override the GitCode API host.
+  <span class="flag">--install-completion</span>       Install completion for the current shell.
+  <span class="flag">--show-completion</span>          Show completion for the current shell.
+  <span class="flag">--help</span>                      Show this message and exit.
+
+Commands:
+  api         Raw GitCode API access
+  auth        Authenticate gc with GitCode
+  repo        Manage repositories
+  pr          Manage pull requests
+  issue       Manage issues
+  release     Manage releases
+  search      Search bundled API docs and GitCode resources
+  config      Manage gc configuration
+  completion  Generate shell completions
+  version     Print gc version</pre>
+        </div>
+      </section>
+    </main>
+  </body>
+  </html>

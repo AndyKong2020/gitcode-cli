@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>GitCode CLI Search</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <main class="wrap">
+      <div class="eyebrow">Bundled docs search</div>
+      <h1>Search the GitCode API docs without leaving your terminal.</h1>
+      <p class="subtitle">
+        The CLI ships with endpoint catalog data, so you can discover methods, paths, and
+        categories before dropping down to raw API calls.
+      </p>
+
+      <section class="terminal">
+        <div class="terminal-header">
+          <div class="dots">
+            <span class="dot red"></span>
+            <span class="dot yellow"></span>
+            <span class="dot green"></span>
+          </div>
+          <div class="terminal-title">gc search docs "Create Issue"</div>
+        </div>
+        <div class="terminal-body">
+          <pre><span class="cmd">$ gc search docs "Create Issue"</span>
+
+                                 API Endpoints
+┏━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━┓
+┃ Method ┃ Path                            ┃ Title                ┃ Categories ┃
+┡━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━┩
+│ POST   │ /api/v5/repos/{owner}/issues    │ Create Issue         │ Issues     │
+│ POST   │ /api/v5/repos/{owner}/{repo}/…  │ Create Issue Comment │ Issues     │
+│ POST   │ /api/v5/repos/{owner}/{repo}/…  │ Create Issue Label   │ Issues     │
+└────────┴─────────────────────────────────┴──────────────────────┴────────────┘
+
+<span class="note">Tip:</span> use <span class="accent">gc api</span> as the escape hatch for endpoints that don’t have a dedicated
+subcommand yet.</pre>
+        </div>
+      </section>
+    </main>
+  </body>
+  </html>

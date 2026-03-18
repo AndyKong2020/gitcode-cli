@@ -4,6 +4,8 @@
 
 It is designed to feel familiar if you already use `gh`, while staying focused on GitCode's REST API and workflows.
 
+![GitCode CLI overview](docs/screenshots/cli-overview.png)
+
 ## Status
 
 v1 focuses on the core command groups:
@@ -100,6 +102,8 @@ gc pr comment 12 my-org/my-repo --body-file ./review-comment.md
 gc release create my-org/my-repo --tag v1.2.3 --title "v1.2.3" --notes-file ./release-notes.md
 ```
 
+![Bundled docs search](docs/screenshots/docs-search.png)
+
 Search GitCode API docs bundled with the CLI:
 
 ```bash
@@ -168,6 +172,8 @@ gc api /api/v5/repos/{owner}/{repo}/branches -P owner=my-org -P repo=my-repo
 gc api /api/v5/repos/{owner}/{repo}/hooks -P owner=my-org -P repo=my-repo
 ```
 
+![Common workflow](docs/screenshots/workflow.png)
+
 ## Shell Completion
 
 ```bash
@@ -182,3 +188,7 @@ gc completion fish
 - [Authentication details](docs/AUTH.md)
 - [gh-style behavior and differences](docs/GH_DIFFERENCES.md)
 - [Command examples](docs/COMMANDS.md)
+
+## Screenshot Sources
+
+The README screenshots are generated from static HTML sources in `docs/screenshots/src/`.
