@@ -1,0 +1,50 @@
+[build-system]
+requires = ["hatchling>=1.27.0"]
+build-backend = "hatchling.build"
+
+[project]
+name = "gitcode-cli"
+version = "0.1.0"
+description = "A GitHub CLI-style command line interface for GitCode."
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "MIT" }
+authors = [
+  { name = "AndyKong" }
+]
+dependencies = [
+  "httpx>=0.28.1",
+  "platformdirs>=4.3.6",
+  "rich>=14.1.0",
+  "tomli-w>=1.2.0",
+  "typer>=0.16.1",
+]
+
+[project.scripts]
+gc = "gitcode_cli.main:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/gitcode_cli"]
+
+[tool.hatch.build.targets.sdist]
+include = [
+  "/README.md",
+  "/docs",
+  "/install.sh",
+  "/src",
+  "/tests",
+  "/.github/workflows",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
+
+[dependency-groups]
+dev = [
+  "pytest>=8.3.5",
+  "respx>=0.22.0",
+]
+
+[tool.uv]
+default-groups = ["dev"]
