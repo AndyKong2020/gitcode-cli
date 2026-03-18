@@ -8,6 +8,7 @@ GC_VERSION="${GC_VERSION:-}"
 INSTALL_VENV="$GC_HOME/venv"
 WRAPPER_PATH="$GC_BIN_DIR/gc"
 COMMAND="${1:-install}"
+TMP_CLEANUP_DIR=""
 
 log() {
   printf '%s\n' "$*"
@@ -72,7 +73,8 @@ install_gc() {
   ref="$(latest_ref)"
   url="$(archive_url "$ref")"
   tmp="$(mktemp -d)"
-  trap 'rm -rf "$tmp"' EXIT
+  TMP_CLEANUP_DIR="$tmp"
+  trap 'rm -rf "$TMP_CLEANUP_DIR"' EXIT
 
   mkdir -p "$GC_HOME" "$GC_BIN_DIR"
   curl -fsSL "$url" -o "$tmp/src.tar.gz"
@@ -96,6 +98,9 @@ EOF
     *":$GC_BIN_DIR:"*) ;;
     *) log "Add $GC_BIN_DIR to PATH to use gc from new shells." ;;
   esac
+
+  rm -rf "$tmp"
+  TMP_CLEANUP_DIR=""
 }
 
 uninstall_gc() {
