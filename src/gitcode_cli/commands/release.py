@@ -1,9 +1,11 @@
 from __future__ import annotations
 
+from pathlib import Path
+
 import typer
 
 from gitcode_cli.api.client import APIError
-from gitcode_cli.commands.common import exit_for_api_error, json_or_render, resolve_repo_arg, root_options
+from gitcode_cli.commands.common import exit_for_api_error, json_or_render, open_html_url, resolve_body_input, resolve_repo_arg, root_options
 from gitcode_cli.context import build_runtime
 from gitcode_cli.formatting.output import print_kv, print_message, print_table
 
@@ -33,6 +35,7 @@ def view_release(
     ctx: typer.Context,
     tag: str,
     repo: str | None = typer.Argument(None),
+    web: bool = typer.Option(False, "--web", help="Open the release in a browser."),
     json_output: bool = typer.Option(False, "--json"),
 ) -> None:
     runtime = build_runtime(profile_override=root_options(ctx).get("profile"), host_override=root_options(ctx).get("host"))
@@ -42,6 +45,9 @@ def view_release(
         payload = client.request("GET", f"/api/v5/repos/{owner}/{name}/releases/{tag}")
     except APIError as error:
         exit_for_api_error(error)
+    if web:
+        open_html_url(payload.get("html_url", ""))
+        return
     json_or_render(json_output, payload, lambda body: print_kv(f"Release {tag}", {"name": body.get("name"), "created_at": body.get("created_at"), "url": body.get("html_url"), "body": body.get("body")}))
 
 
@@ -51,15 +57,17 @@ def create_release(
     repo: str | None = typer.Argument(None),
     tag: str = typer.Option(..., "--tag"),
     name: str = typer.Option(..., "--title", "--name"),
-    notes: str = typer.Option(..., "--notes", "--body"),
+    notes: str | None = typer.Option(None, "--notes", "--body"),
+    notes_file: Path | None = typer.Option(None, "--notes-file", "--body-file", exists=True, dir_okay=False, readable=True),
     target: str | None = typer.Option(None, "--target"),
     json_output: bool = typer.Option(False, "--json"),
 ) -> None:
     runtime = build_runtime(profile_override=root_options(ctx).get("profile"), host_override=root_options(ctx).get("host"))
     client = runtime.require_client()
     owner, repo_name = resolve_repo_arg(repo, runtime)
+    release_notes = resolve_body_input(notes, notes_file, "Release notes", "")
     try:
-        payload = client.request("POST", f"/api/v5/repos/{owner}/{repo_name}/releases", json_body={"tag_name": tag, "name": name, "body": notes, "target_commitish": target})
+        payload = client.request("POST", f"/api/v5/repos/{owner}/{repo_name}/releases", json_body={"tag_name": tag, "name": name, "body": release_notes, "target_commitish": target})
     except APIError as error:
         exit_for_api_error(error)
     json_or_render(json_output, payload, lambda body: print_message(body.get("html_url", f"Created release {tag}")))

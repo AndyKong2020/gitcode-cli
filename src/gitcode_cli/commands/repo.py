@@ -3,7 +3,7 @@ from __future__ import annotations
 import typer
 
 from gitcode_cli.api.client import APIError
-from gitcode_cli.commands.common import exit_for_api_error, json_or_render, resolve_repo_arg, root_options
+from gitcode_cli.commands.common import exit_for_api_error, json_or_render, open_html_url, resolve_repo_arg, root_options
 from gitcode_cli.context import build_runtime
 from gitcode_cli.formatting.output import print_kv, print_message, print_table
 from gitcode_cli.git.repo import git_clone
@@ -47,6 +47,7 @@ def list_repos(
 def view(
     ctx: typer.Context,
     repo: str | None = typer.Argument(None),
+    web: bool = typer.Option(False, "--web", help="Open the repository in a browser."),
     json_output: bool = typer.Option(False, "--json"),
 ) -> None:
     runtime = build_runtime(profile_override=root_options(ctx).get("profile"), host_override=root_options(ctx).get("host"))
@@ -56,6 +57,9 @@ def view(
         payload = client.request("GET", f"/api/v5/repos/{owner}/{name}")
     except APIError as error:
         exit_for_api_error(error)
+    if web:
+        open_html_url(payload.get("html_url", ""))
+        return
     json_or_render(
         json_output,
         payload,
@@ -79,6 +83,7 @@ def create(
     private: bool = typer.Option(True, "--private/--public"),
     auto_init: bool = typer.Option(True, "--auto-init/--no-auto-init"),
     clone: bool = typer.Option(False, "--clone"),
+    ssh: bool = typer.Option(False, "--ssh", help="Use SSH when cloning after create."),
     default_branch: str = typer.Option("main", "--default-branch"),
     json_output: bool = typer.Option(False, "--json"),
 ) -> None:
@@ -100,7 +105,7 @@ def create(
     except APIError as error:
         exit_for_api_error(error)
     if clone:
-        git_clone(_repo_clone_url(payload, ssh=False))
+        git_clone(_repo_clone_url(payload, ssh=ssh))
     json_or_render(json_output, payload, lambda body: print_message(body.get("html_url", repo_name)))
 
 

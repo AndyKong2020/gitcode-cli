@@ -31,3 +31,19 @@ Environment overrides:
 
 - Homebrew users should use `brew upgrade gitcode-cli`
 - Install script users should run `install.sh update`
+
+## First run
+
+After install:
+
+```bash
+gc auth login
+gc auth status
+gc repo list
+```
+
+If `gc` is not found in a new shell after using `install.sh`, add this to your shell profile:
+
+```bash
+export PATH="$HOME/.local/bin:$PATH"
+```

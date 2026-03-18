@@ -1,9 +1,11 @@
 from __future__ import annotations
 
+from pathlib import Path
+
 import typer
 
 from gitcode_cli.api.client import APIError
-from gitcode_cli.commands.common import exit_for_api_error, json_or_render, resolve_repo_arg, root_options
+from gitcode_cli.commands.common import exit_for_api_error, json_or_render, open_html_url, resolve_body_input, resolve_repo_arg, root_options
 from gitcode_cli.context import build_runtime
 from gitcode_cli.formatting.output import print_kv, print_message, print_table
 
@@ -38,6 +40,7 @@ def view_issue(
     ctx: typer.Context,
     number: str,
     repo: str | None = typer.Argument(None),
+    web: bool = typer.Option(False, "--web", help="Open the issue in a browser."),
     json_output: bool = typer.Option(False, "--json"),
 ) -> None:
     runtime = build_runtime(profile_override=root_options(ctx).get("profile"), host_override=root_options(ctx).get("host"))
@@ -47,6 +50,9 @@ def view_issue(
         payload = client.request("GET", f"/api/v5/repos/{owner}/{name}/issues/{number}")
     except APIError as error:
         exit_for_api_error(error)
+    if web:
+        open_html_url(payload.get("html_url", ""))
+        return
     json_or_render(json_output, payload, lambda body: print_kv(f"Issue #{number}", {"title": body.get("title"), "state": body.get("state"), "url": body.get("html_url"), "body": body.get("body")}))
 
 
@@ -56,13 +62,14 @@ def create_issue(
     repo: str | None = typer.Argument(None),
     title: str | None = typer.Option(None, "--title"),
     body: str | None = typer.Option(None, "--body"),
+    body_file: Path | None = typer.Option(None, "--body-file", exists=True, dir_okay=False, readable=True),
     json_output: bool = typer.Option(False, "--json"),
 ) -> None:
     runtime = build_runtime(profile_override=root_options(ctx).get("profile"), host_override=root_options(ctx).get("host"))
     client = runtime.require_client()
     owner, name = resolve_repo_arg(repo, runtime)
     issue_title = title or typer.prompt("Issue title")
-    issue_body = body if body is not None else typer.prompt("Issue body", default="")
+    issue_body = resolve_body_input(body, body_file, "Issue body", "")
     try:
         payload = client.request("POST", f"/api/v5/repos/{owner}/issues", json_body={"repo": name, "title": issue_title, "body": issue_body})
     except APIError as error:
@@ -77,6 +84,7 @@ def edit_issue(
     repo: str | None = typer.Argument(None),
     title: str | None = typer.Option(None, "--title"),
     body: str | None = typer.Option(None, "--body"),
+    body_file: Path | None = typer.Option(None, "--body-file", exists=True, dir_okay=False, readable=True),
     state: str | None = typer.Option(None, "--state"),
     json_output: bool = typer.Option(False, "--json"),
 ) -> None:
@@ -86,8 +94,8 @@ def edit_issue(
     payload_data = {"repo": name}
     if title is not None:
         payload_data["title"] = title
-    if body is not None:
-        payload_data["body"] = body
+    if body is not None or body_file is not None:
+        payload_data["body"] = resolve_body_input(body, body_file, "Issue body", "")
     if state is not None:
         payload_data["state"] = state
     try:
@@ -103,12 +111,13 @@ def comment_issue(
     number: str,
     repo: str | None = typer.Argument(None),
     body: str | None = typer.Option(None, "--body"),
+    body_file: Path | None = typer.Option(None, "--body-file", exists=True, dir_okay=False, readable=True),
     json_output: bool = typer.Option(False, "--json"),
 ) -> None:
     runtime = build_runtime(profile_override=root_options(ctx).get("profile"), host_override=root_options(ctx).get("host"))
     client = runtime.require_client()
     owner, name = resolve_repo_arg(repo, runtime)
-    comment_body = body or typer.prompt("Comment")
+    comment_body = resolve_body_input(body, body_file, "Comment")
     try:
         payload = client.request("POST", f"/api/v5/repos/{owner}/{name}/issues/{number}/comments", json_body={"body": comment_body})
     except APIError as error:

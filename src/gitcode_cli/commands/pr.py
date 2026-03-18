@@ -6,7 +6,7 @@ import subprocess
 import typer
 
 from gitcode_cli.api.client import APIError
-from gitcode_cli.commands.common import exit_for_api_error, json_or_render, resolve_repo_arg, root_options
+from gitcode_cli.commands.common import exit_for_api_error, json_or_render, open_html_url, resolve_body_input, resolve_repo_arg, root_options
 from gitcode_cli.context import build_runtime
 from gitcode_cli.formatting.output import print_kv, print_message, print_table
 from gitcode_cli.git.repo import git_add_remote, git_checkout_pr
@@ -42,6 +42,7 @@ def view_pr(
     ctx: typer.Context,
     number: int,
     repo: str | None = typer.Argument(None),
+    web: bool = typer.Option(False, "--web", help="Open the pull request in a browser."),
     json_output: bool = typer.Option(False, "--json"),
 ) -> None:
     runtime = build_runtime(profile_override=root_options(ctx).get("profile"), host_override=root_options(ctx).get("host"))
@@ -51,6 +52,9 @@ def view_pr(
         payload = client.request("GET", f"/api/v5/repos/{owner}/{name}/pulls/{number}")
     except APIError as error:
         exit_for_api_error(error)
+    if web:
+        open_html_url(payload.get("html_url", ""))
+        return
     json_or_render(json_output, payload, lambda body: print_kv(f"PR #{number}", {"title": body.get("title"), "state": body.get("state"), "head": body.get("head", {}).get("ref"), "base": body.get("base", {}).get("ref"), "url": body.get("html_url"), "body": body.get("body")}))
 
 
@@ -66,7 +70,8 @@ def create_pr(
     ctx: typer.Context,
     repo: str | None = typer.Argument(None),
     title: str | None = typer.Option(None, "--title"),
-    body: str = typer.Option("", "--body"),
+    body: str | None = typer.Option(None, "--body"),
+    body_file: Path | None = typer.Option(None, "--body-file", exists=True, dir_okay=False, readable=True),
     base: str | None = typer.Option(None, "--base"),
     head: str | None = typer.Option(None, "--head"),
     draft: bool = typer.Option(False, "--draft"),
@@ -77,13 +82,14 @@ def create_pr(
     owner, name = resolve_repo_arg(repo, runtime)
     repo_info = client.request("GET", f"/api/v5/repos/{owner}/{name}")
     pr_title = title or typer.prompt("Pull request title")
+    pr_body = resolve_body_input(body, body_file, "Pull request body", "")
     pr_head = head or _current_branch() or typer.prompt("Head branch")
     pr_base = base or repo_info.get("default_branch") or typer.prompt("Base branch")
     try:
         payload = client.request(
             "POST",
             f"/api/v5/repos/{owner}/{name}/pulls",
-            json_body={"title": pr_title, "body": body, "head": pr_head, "base": pr_base, "draft": draft},
+            json_body={"title": pr_title, "body": pr_body, "head": pr_head, "base": pr_base, "draft": draft},
         )
     except APIError as error:
         exit_for_api_error(error)
@@ -126,12 +132,13 @@ def comment_pr(
     number: int,
     repo: str | None = typer.Argument(None),
     body: str | None = typer.Option(None, "--body"),
+    body_file: Path | None = typer.Option(None, "--body-file", exists=True, dir_okay=False, readable=True),
     json_output: bool = typer.Option(False, "--json"),
 ) -> None:
     runtime = build_runtime(profile_override=root_options(ctx).get("profile"), host_override=root_options(ctx).get("host"))
     client = runtime.require_client()
     owner, name = resolve_repo_arg(repo, runtime)
-    comment_body = body or typer.prompt("Comment")
+    comment_body = resolve_body_input(body, body_file, "Comment")
     try:
         payload = client.request("POST", f"/api/v5/repos/{owner}/{name}/pulls/{number}/comments", json_body={"body": comment_body})
     except APIError as error:
